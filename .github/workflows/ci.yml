@@ -7,53 +7,100 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-test:
+  # Code Quality Checks (all run in parallel)
+  gofmt:
+    name: 📝 Format Check
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: Check formatting
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "❌ Code is not formatted"
+            gofmt -l .
+            exit 1
+          fi
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.23'
+  go-vet:
+    name: 🔍 Go Vet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - run: go vet ./...
 
-    - name: Install dependencies
-      run: go mod download
+  golangci-lint:
+    name: 🧹 Linter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
 
-    # ----------------------------
-    # Linting & Standards
-    # ----------------------------
+  # Testing
+  unit-tests:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - run: go mod download
+      - name: Run tests
+        run: go test ./... -v -race -coverprofile=coverage.out
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.out
 
-    - name: Check formatting (gofmt)
-      run: |
-        if [ -n "$(gofmt -l .)" ]; then
-          echo "❌ Code is not formatted. Run 'gofmt -w .'"
-          gofmt -l .
-          exit 1
-        fi
-        echo "✅ gofmt passed"
+  # Security
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: securego/gosec@master
+        with:
+          args: './...'
 
-    - name: Run go vet
-      run: go vet ./...
+  dependency-check:
+    name: 📦 Dependency Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: Check for vulnerabilities
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
 
-    - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v4
-      with:
-        version: latest
-
-    # ----------------------------
-    # Tests + Build
-    # ----------------------------
-
-    - name: Run tests
-      run: go test ./... -v
-
-    - name: Build binary
-      run: go build -o goscripts ./cmd/goscripts
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: goscripts
-        path: goscripts
+  # Build (waits for all checks to pass)
+  build:
+    name: 🔨 Build Binary
+    runs-on: ubuntu-latest
+    needs: [gofmt, go-vet, golangci-lint, unit-tests, security-scan, dependency-check]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - run: go mod download
+      - name: Build
+        run: go build -o goscripts ./cmd/goscripts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: goscripts
+          path: goscripts
+          retention-days: 7
