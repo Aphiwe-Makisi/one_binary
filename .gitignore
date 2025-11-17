@@ -1,0 +1,5 @@
+/goscripts
+/bin/
+/vendor/
+*.log
+*.env
