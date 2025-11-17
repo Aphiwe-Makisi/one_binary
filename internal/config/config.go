@@ -14,8 +14,8 @@ type Config struct {
 	} `mapstructure:"logging"`
 
 	Scripts struct {
-		BackupPath string `mapstructure:"backup_path`
-	} `mapstricture:"scripts"`
+		BackupPath string `mapstructure:"backup_path"`
+	} `mapstructure:"scripts"`
 }
 
 var C Config
