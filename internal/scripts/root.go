@@ -1,6 +1,8 @@
 package scripts
 
 import (
+	"fmt"
+
 	"github.com/Aphiwe-Makisi/one_binary/internal/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,4 +34,11 @@ func initConfig() error {
 	}
 
 	return nil
+}
+
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		return
+	}
 }

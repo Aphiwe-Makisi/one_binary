@@ -1,13 +1,13 @@
-.PHONY build test clean
+.PHONY: build test clean
 
 BINARY=goscripts
 LDFLAGS=-X main.version=dev
 
 build:
-	go build -ldflags "$(LDFLAGS)" -o $(BINARY) ./cmd/$(BINARY)
+	go build -ldflags "$(LDFLAGS)" -o $(BINARY) ./cmd/goscripts
 
 test:
-	go list ./... | xargs -I {} go test {} || true
+	go test ./...
 
 clean:
 	rm -f $(BINARY)
