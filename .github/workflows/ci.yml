@@ -76,7 +76,6 @@ jobs:
         with:
           path: ~/.cache/go-build
           key: go-build-${{ hashFiles('go.sum') }}
-          key: go-mod-${{ hashFiles('go.sum') }}
 
       - run: go mod download
 
