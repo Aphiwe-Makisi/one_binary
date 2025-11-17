@@ -3,7 +3,8 @@ name: Go CI & Release
 on:
   push:
     branches: [ "main" ]
-    tags: [ '*' ]  # Trigger release on any tag push
+    tags:
+      - 'v*.*.*'
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
