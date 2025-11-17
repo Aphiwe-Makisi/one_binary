@@ -21,8 +21,33 @@ jobs:
     - name: Install dependencies
       run: go mod download
 
+    # ----------------------------
+    # Linting & Standards
+    # ----------------------------
+
+    - name: Check formatting (gofmt)
+      run: |
+        if [ -n "$(gofmt -l .)" ]; then
+          echo "❌ Code is not formatted. Run 'gofmt -w .'"
+          gofmt -l .
+          exit 1
+        fi
+        echo "✅ gofmt passed"
+
+    - name: Run go vet
+      run: go vet ./...
+
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v4
+      with:
+        version: latest
+
+    # ----------------------------
+    # Tests + Build
+    # ----------------------------
+
     - name: Run tests
-      run: go test ./...
+      run: go test ./... -v
 
     - name: Build binary
       run: go build -o goscripts ./cmd/goscripts
