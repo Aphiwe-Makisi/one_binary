@@ -9,8 +9,9 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
-permissions:
-  contents: write
+env:
+  GO_OS: linux
+  GO_ARCH: amd64
 
 jobs:
 
@@ -111,34 +112,20 @@ jobs:
     needs: [gofmt, go-vet, lint, tests]
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        goos: [linux]
-        goarch: [amd64, arm64]
-
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
           go-version: 1.23
-
-      - name: Cache Go Modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: go-mod-${{ hashFiles('go.sum') }}
-
-      - run: go mod download
 
       - name: Build static binary
         run: |
           CGO_ENABLED=0 \
-          GOOS=${{ matrix.goos }} \
-          GOARCH=${{ matrix.goarch }} \
-          go build -tags netgo -ldflags="-s -w -extldflags=-static" \
-          -o goscripts-${{ matrix.goos }}-${{ matrix.goarch }} \
+          GOOS=${{ env.GO_OS }} \
+          GOARCH=${{ env.GO_ARCH }} \
+          go build \
+          -o goscripts-${{ env.GO_OS }}-${{ env.GO_ARCH }} \
           ./cmd/goscripts
 
       - uses: actions/upload-artifact@v4
