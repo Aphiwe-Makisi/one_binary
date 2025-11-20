@@ -1,9 +1,10 @@
-database:
-  host: "localhost"
-  port: 3306
-  user: "aphiwem"
-  password: ""
-  name: "prepaid"
+development:
+  database:
+    host: "localhost"
+    port: 3306
+    username: "aphiwem"
+    password: ""
+    name: "prepaid"
 
 logging:
   level: "info"
