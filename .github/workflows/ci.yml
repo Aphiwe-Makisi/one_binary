@@ -126,7 +126,7 @@ jobs:
           GOARCH=${{ env.GO_ARCH }} \
           go build \
           -o goscripts-${{ env.GO_OS }}-${{ env.GO_ARCH }} \
-          .
+          main.go
 
       - uses: actions/upload-artifact@v4
         with:
