@@ -126,9 +126,9 @@ jobs:
           GOARCH=${{ env.GO_ARCH }} \
           go build \
           -o goscripts-${{ env.GO_OS }}-${{ env.GO_ARCH }} \
-          ./
+          .
 
       - uses: actions/upload-artifact@v4
         with:
-          name: goscripts-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: goscripts-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: goscripts-${{ env.GO_OS }}-${{ env.GO_ARCH }}
+          path: goscripts-${{ env.GO_OS }}-${{ env.GO_ARCH }}
